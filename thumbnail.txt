@@ -1,0 +1,5 @@
+Place your game's thumbnail image here.
+File name: thumbnail.png
+Recommended size: 320x180 pixels (16:9 ratio)
+
+This image appears in the Unity WebGL Template browser in the Editor.

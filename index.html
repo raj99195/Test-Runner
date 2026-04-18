@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Epic Runner — InitiaArcade</title>
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #0C0C0C;
+      color: #fff;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Inter", sans-serif;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── TOPBAR ─────────────────────────────── */
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 24px;
+      border-bottom: 0.5px solid #1a1a1a;
+      background: rgba(12,12,12,0.98);
+      flex-shrink: 0;
+      z-index: 10;
+    }
+
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .arcade-logo {
+      width: 28px;
+      height: 28px;
+      background: #00FF88;
+      border-radius: 6px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2px;
+      padding: 5px;
+      flex-shrink: 0;
+    }
+    .arcade-logo span { background: #0C0C0C; border-radius: 1px; }
+    .arcade-logo span:last-child { border-radius: 50%; }
+
+    .arcade-name {
+      font-size: 15px;
+      font-weight: 500;
+      letter-spacing: -0.3px;
+      color: #fff;
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .initia-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 10px;
+      border: 0.5px solid #252525;
+      border-radius: 6px;
+    }
+
+    .initia-icon {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .badge-text {
+      font-size: 11px;
+      color: #555;
+    }
+
+    .live-dot {
+      width: 5px;
+      height: 5px;
+      background: #00FF88;
+      border-radius: 50%;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    .chain-label {
+      font-size: 11px;
+      color: #444;
+    }
+
+    /* ── MAIN AREA ─────────────────────────── */
+    .main {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* ── LOADING SCREEN ────────────────────── */
+    #loading-screen {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: #0C0C0C;
+      z-index: 5;
+    }
+
+    /* Grid background */
+    #loading-screen::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+      background-size: 48px 48px;
+      pointer-events: none;
+    }
+
+    /* Green glow */
+    .glow-orb {
+      position: absolute;
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(0,255,136,0.07) 0%, transparent 65%);
+      border-radius: 50%;
+      pointer-events: none;
+      animation: glowPulse 3.5s ease-in-out infinite;
+    }
+
+    @keyframes glowPulse {
+      0%, 100% { opacity: 0.7; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.12); }
+    }
+
+    .loading-content {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* Logo mark — floating */
+    .big-logo {
+      width: 72px;
+      height: 72px;
+      background: #00FF88;
+      border-radius: 16px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 5px;
+      padding: 13px;
+      margin-bottom: 28px;
+      animation: float 3.5s ease-in-out infinite;
+    }
+    .big-logo span { background: #0C0C0C; border-radius: 2px; }
+    .big-logo span:last-child { border-radius: 50%; }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50%       { transform: translateY(-10px); }
+    }
+
+    .game-name {
+      font-size: 32px;
+      font-weight: 500;
+      letter-spacing: -1px;
+      color: #fff;
+      margin-bottom: 6px;
+      text-align: center;
+    }
+
+    .game-chain {
+      font-size: 12px;
+      color: #444;
+      margin-bottom: 52px;
+      text-align: center;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+
+    /* Progress */
+    .progress-wrap {
+      width: 300px;
+    }
+
+    .progress-track {
+      height: 2px;
+      background: #1a1a1a;
+      border-radius: 1px;
+      overflow: hidden;
+      margin-bottom: 10px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: #00FF88;
+      border-radius: 1px;
+      width: 0%;
+      transition: width 0.25s ease;
+    }
+
+    .progress-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .progress-status {
+      font-size: 10px;
+      color: #333;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+    }
+
+    .progress-pct {
+      font-size: 10px;
+      color: #444;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Bottom branding */
+    .bottom-brand {
+      position: absolute;
+      bottom: 28px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 18px;
+      border: 0.5px solid #1a1a1a;
+      border-radius: 20px;
+      white-space: nowrap;
+    }
+
+    .brand-dot { width: 4px; height: 4px; background: #222; border-radius: 50%; }
+
+    .brand-text {
+      font-size: 10px;
+      color: #333;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .brand-green {
+      font-size: 10px;
+      color: #00FF88;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* ── GAME CANVAS ───────────────────────── */
+    #unity-container {
+      position: absolute;
+      inset: 0;
+      display: none;
+    }
+
+    #unity-canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    /* Error screen */
+    #error-screen {
+      display: none;
+      position: absolute;
+      inset: 0;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      background: #0C0C0C;
+      z-index: 6;
+    }
+
+    .error-icon {
+      font-size: 48px;
+    }
+
+    .error-title {
+      font-size: 18px;
+      font-weight: 500;
+      color: #ff4444;
+    }
+
+    .error-msg {
+      font-size: 13px;
+      color: #444;
+      max-width: 400px;
+      text-align: center;
+      line-height: 1.6;
+    }
+
+    .error-reload {
+      padding: 10px 24px;
+      background: transparent;
+      border: 0.5px solid #2a2a2a;
+      border-radius: 8px;
+      color: #fff;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    /* ── FOOTER ────────────────────────────── */
+    .footer {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      padding: 8px 24px;
+      border-top: 0.5px solid #111;
+      flex-shrink: 0;
+    }
+
+    .footer-item {
+      font-size: 9px;
+      color: #252525;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+    }
+
+    .footer-sep {
+      width: 2px;
+      height: 2px;
+      background: #1e1e1e;
+      border-radius: 50%;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top bar -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="arcade-logo">
+        <span></span><span></span><span></span><span></span>
+      </div>
+      <span class="arcade-name">InitiaArcade</span>
+    </div>
+    <div class="topbar-right">
+      <div class="live-dot"></div>
+      <span class="chain-label">initiation-2</span>
+      <div class="initia-badge">
+        <div class="initia-icon">
+          <svg width="7" height="10" viewBox="0 0 7 10" fill="none">
+            <rect x="1.5" y="0" width="4" height="1.5" rx="0.4" fill="#0C0C0C"/>
+            <rect x="2.5" y="1.5" width="2" height="7" rx="0.4" fill="#0C0C0C"/>
+            <rect x="1.5" y="8.5" width="4" height="1.5" rx="0.4" fill="#0C0C0C"/>
+          </svg>
+        </div>
+        <span class="badge-text">Powered by Initia</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main area -->
+  <div class="main">
+
+    <!-- Loading screen -->
+    <div id="loading-screen">
+      <div class="glow-orb"></div>
+
+      <div class="loading-content">
+        <div class="big-logo">
+          <span></span><span></span><span></span><span></span>
+        </div>
+
+        <div class="game-name" id="game-name">Epic Runner</div>
+        <div class="game-chain">on Initia Blockchain</div>
+
+        <div class="progress-wrap">
+          <div class="progress-track">
+            <div class="progress-fill" id="progress-fill"></div>
+          </div>
+          <div class="progress-meta">
+            <span class="progress-status" id="progress-status">Initializing...</span>
+            <span class="progress-pct" id="progress-pct">0%</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="bottom-brand">
+        <div class="initia-icon" style="background:#1a1a1a;width:14px;height:14px;">
+          <svg width="6" height="9" viewBox="0 0 6 9" fill="none">
+            <rect x="1" y="0" width="4" height="1.5" rx="0.4" fill="#555"/>
+            <rect x="2" y="1.5" width="2" height="6" rx="0.4" fill="#555"/>
+            <rect x="1" y="7.5" width="4" height="1.5" rx="0.4" fill="#555"/>
+          </svg>
+        </div>
+        <span class="brand-text">Initia</span>
+        <div class="brand-dot"></div>
+        <span class="brand-text">Move VM</span>
+        <div class="brand-dot"></div>
+        <span class="brand-text">Auto-sign</span>
+        <div class="brand-dot"></div>
+        <span class="brand-green">INITIATE Season 1</span>
+      </div>
+    </div>
+
+    <!-- Unity canvas -->
+    <div id="unity-container">
+      <canvas id="unity-canvas" tabindex="-1"></canvas>
+    </div>
+
+    <!-- Error screen -->
+    <div id="error-screen">
+      <div class="error-icon">⚠️</div>
+      <div class="error-title">Failed to load game</div>
+      <div class="error-msg" id="error-msg">
+        An error occurred while loading the game. Please check your connection and try again.
+      </div>
+      <button class="error-reload" onclick="location.reload()">Reload</button>
+    </div>
+
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <span class="footer-item">InitiaArcade</span>
+    <span class="footer-sep"></span>
+    <span class="footer-item">Initia Blockchain</span>
+    <span class="footer-sep"></span>
+    <span class="footer-item">INITIATE Season 1</span>
+    <span class="footer-sep"></span>
+    <span class="footer-item">Move VM</span>
+    <span class="footer-sep"></span>
+    <span class="footer-item">Auto-Sign</span>
+  </div>
+
+  <!-- arcade-sdk.js — auto included in every WebGL build -->
+  <script src="arcade-sdk.js"></script>
+
+  <!-- Unity WebGL Loader -->
+  <script>
+    var buildUrl = "Build";
+    var loaderUrl = buildUrl + "/Test-Runner.loader.js";
+
+    var config = {
+      dataUrl:            buildUrl + "/Test-Runner.data",
+      frameworkUrl:       buildUrl + "/Test-Runner.framework.js",
+      codeUrl:            buildUrl + "/Test-Runner.wasm",
+      streamingAssetsUrl: "StreamingAssets",
+      companyName:        "DefaultCompany",
+      productName:        "Epic Runner",
+      productVersion:     "1.0.0",
+    };
+
+    var progressFill   = document.getElementById("progress-fill");
+    var progressPct    = document.getElementById("progress-pct");
+    var progressStatus = document.getElementById("progress-status");
+
+    var statusMessages = [
+      [0,   "Initializing..."],
+      [0.2, "Loading assets..."],
+      [0.5, "Compiling shaders..."],
+      [0.7, "Connecting to blockchain..."],
+      [0.9, "Almost ready..."],
+      [1.0, "Starting game..."],
+    ];
+
+    function onProgress(progress) {
+      var pct = Math.round(progress * 100);
+      progressFill.style.width = pct + "%";
+      progressPct.textContent  = pct + "%";
+
+      for (var i = statusMessages.length - 1; i >= 0; i--) {
+        if (progress >= statusMessages[i][0]) {
+          progressStatus.textContent = statusMessages[i][1];
+          break;
+        }
+      }
+    }
+
+    var script = document.createElement("script");
+    script.src = loaderUrl;
+
+    script.onload = function () {
+      createUnityInstance(
+        document.querySelector("#unity-canvas"),
+        config,
+        onProgress
+      )
+      .then(function (unityInstance) {
+        window.gameInstance = unityInstance;
+        document.getElementById("loading-screen").style.display = "none";
+        document.getElementById("unity-container").style.display = "block";
+      })
+      .catch(function (message) {
+        document.getElementById("loading-screen").style.display = "none";
+        var err = document.getElementById("error-screen");
+        err.style.display = "flex";
+        document.getElementById("error-msg").textContent = message || "Unknown error.";
+        console.error("[InitiaArcade] Unity load failed:", message);
+      });
+    };
+
+    script.onerror = function () {
+      document.getElementById("loading-screen").style.display = "none";
+      var err = document.getElementById("error-screen");
+      err.style.display = "flex";
+      document.getElementById("error-msg").textContent =
+        "Could not load game files. Make sure the Build folder is present.";
+    };
+
+    document.body.appendChild(script);
+  </script>
+
+</body>
+</html>
